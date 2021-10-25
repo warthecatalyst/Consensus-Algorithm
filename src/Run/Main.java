@@ -1,7 +1,13 @@
 package Run;
 
+import POW.Block;
+import POW.BlockChain;
+import POW.GenesisBlock;
+
 public class Main {
     public static void main(String[] args) {
-        System.out.println("Hello world");
+        BlockChain blockChain = new BlockChain();
+        Block genesisBlock = GenesisBlock.genesisBlock();
+        blockChain.add(genesisBlock);
     }
 }

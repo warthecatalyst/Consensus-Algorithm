@@ -3,7 +3,7 @@ package POW;
 import java.util.Date;
 
 /**
- * 用于创建创世区块的文件
+ * 用于创建创世区块的类
  */
 public class GenesisBlock {
     public static Block genesisBlock(){

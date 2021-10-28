@@ -43,13 +43,17 @@ public class Peer implements Runnable{
             }
             String msg = "Completed";
             while(true){
-                Thread.sleep(50);
-                for(int i=0;i<prwrs.length;i++){
-                    prwrs[i].println(msg);
+//                Thread.sleep(50);
+//                for(int i=0;i<prwrs.length;i++){
+//                    prwrs[i].println(msg);
+//                }
+                for(int i=0;i<bufrs.length;i++){
+                    String res = bufrs[i].readLine();
+                    System.out.println(res);
                 }
             }
 
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }

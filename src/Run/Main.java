@@ -17,7 +17,7 @@ public class Main {
 
         //基本网络配置，此处的内容都根据自己的情况进行修改
         int ID = 1; //should be changed
-        String initaddr = "10.22.37.222";
+        String initaddr = "10.21.180.88";
         int portnum = 9090;
 
         Scanner scanner = new Scanner(System.in);
@@ -37,7 +37,7 @@ public class Main {
         }
         Peer peer = new Peer(ID,portnum,peeraddrs,peerPorts);
         peer.run();
-        
+
     }
 
 }

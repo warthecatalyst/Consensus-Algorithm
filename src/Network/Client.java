@@ -11,10 +11,11 @@ import java.io.*;
 public class Client implements Runnable{
     private final String ServerAddr;
     private final int Serverport;
-
-    public Client(String ServerAddr,int Serverport){
+    private final int peerID;
+    public Client(String ServerAddr,int Serverport,int peerID){
         this.ServerAddr = ServerAddr;
         this.Serverport = Serverport;
+        this.peerID = peerID;
     }
 
     @Override
@@ -25,12 +26,13 @@ public class Client implements Runnable{
             PrintWriter osToServer = new PrintWriter(socket.getOutputStream(),true);
 
             while(true){
-                String msg = "to Server: Hello this is Client";
+                String msg = "to Server: Hello this is Client "+ peerID;
                 osToServer.println(msg);
                 String res = isFromServer.readLine();
                 System.out.println("Message from Server:"+res);
+                Thread.sleep(100);
             }
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
     }
@@ -45,7 +47,7 @@ public class Client implements Runnable{
         System.out.println("请输入服务器的端口号");
         ServerPort = scanner.nextInt();
 
-        Client client = new Client(ServerAddr,ServerPort);
-        client.run();
+        //Client client = new Client(ServerAddr,ServerPort);
+        //client.run();
     }
 }

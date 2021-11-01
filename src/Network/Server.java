@@ -10,10 +10,11 @@ import java.net.*;
 public class Server implements Runnable{
     private final String Addr;
     private final int Portnum;
-
-    public Server(String Addr,int Portnum){
+    private final int PeerID;
+    public Server(String Addr,int Portnum,int peerID){
         this.Addr = Addr;
         this.Portnum = Portnum;
+        this.PeerID = peerID;
     }
 
     @Override
@@ -26,7 +27,7 @@ public class Server implements Runnable{
             while(true){
                 String res = isFromClient.readLine();
                 System.out.println("result get from client:"+res);
-                String msg = "to client:hello this is Server";
+                String msg = "to client:hello this is Server "+ PeerID;
                 osToClient.println(msg);
 
             }
@@ -49,7 +50,7 @@ public class Server implements Runnable{
         System.out.println("请输入自己的端口号");
         Portnum = scanner.nextInt();
 
-        Server server = new Server(Addr,Portnum);
-        server.run();
+        //Server server = new Server(Addr,Portnum);
+        //server.run();
     }
 }

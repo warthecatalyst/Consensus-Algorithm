@@ -7,7 +7,7 @@ import java.net.*;
 /**
  * 对于每一个Peer，都有一个服务器类和一个接收类
  */
-public class Server implements Runnable{
+public class Server extends Thread{
     private final String Addr;
     private final int Portnum;
     private final int PeerID;

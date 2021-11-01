@@ -8,7 +8,7 @@ import java.io.*;
 /**
  * 每个Peer的客户类
  */
-public class Client implements Runnable{
+public class Client extends Thread{
     private final String ServerAddr;
     private final int Serverport;
     private final int peerID;
@@ -30,7 +30,7 @@ public class Client implements Runnable{
                 osToServer.println(msg);
                 String res = isFromServer.readLine();
                 System.out.println("Message from Server:"+res);
-                Thread.sleep(100);
+                Thread.sleep(1000);
             }
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();

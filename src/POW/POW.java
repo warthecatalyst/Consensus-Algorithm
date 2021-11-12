@@ -30,7 +30,7 @@ public class POW extends Thread{
         for(int i = Integer.MIN_VALUE; ; i++){
             if(isValidNonce(chain.back().Hash,i)){
                 String tmp = SHA256.getSHA256(chain.back().Hash+i);
-                POWBlock newblock = new POWBlock(1,new Date(),"",chain.back().Hash,tmp,DIF,i);
+                POWBlock newblock = new POWBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,tmp,DIF,i);
                 System.out.println(newblock);
                 chain.add(newblock);
                 break;

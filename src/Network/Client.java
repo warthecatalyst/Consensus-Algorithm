@@ -37,6 +37,10 @@ public class Client extends Thread{
         }
     }
 
+    private void send(){
+
+    }
+
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
         String ServerAddr;

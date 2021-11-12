@@ -28,7 +28,6 @@ public class NetworkTest {
         PeerID = scanner.nextInt();
         System.out.println("自己的peerID号为:"+PeerID);
         Thread server = new Server(InetAddr,Portnum,PeerID);
-        server.start();
         List<Thread> tasks = new ArrayList<>();
         System.out.println("请输入其他peer的peerID(0退出):");
         int otherPeerID = scanner.nextInt();
@@ -44,5 +43,6 @@ public class NetworkTest {
         for(Thread task:tasks){
             task.start();
         }
+        server.start();
     }
 }

@@ -50,7 +50,7 @@ public class Server extends Thread{
         System.out.println("请输入自己的端口号");
         Portnum = scanner.nextInt();
 
-        //Server server = new Server(Addr,Portnum);
-        //server.run();
+        Server server = new Server(Addr,Portnum,1);
+        server.start();
     }
 }

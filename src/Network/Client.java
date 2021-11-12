@@ -47,7 +47,7 @@ public class Client extends Thread{
         System.out.println("请输入服务器的端口号");
         ServerPort = scanner.nextInt();
 
-        //Client client = new Client(ServerAddr,ServerPort);
-        //client.run();
+        Client client = new Client(ServerAddr,ServerPort,1);
+        client.start();
     }
 }

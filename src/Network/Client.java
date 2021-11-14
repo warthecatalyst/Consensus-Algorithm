@@ -1,5 +1,7 @@
 package Network;
 
+import OriginBlock.OriginBlock;
+
 import java.util.*;
 import java.net.*;
 import java.io.*;
@@ -37,8 +39,8 @@ public class Client extends Thread{
         }
     }
 
-    private void send(){
-
+    private void send(OriginBlock block){
+        
     }
 
     public static void main(String[] args) {

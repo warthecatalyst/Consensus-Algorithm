@@ -1,5 +1,6 @@
 package Network;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,8 @@ public class NetworkTest {
     private static String InetAddr = "127.0.0.1";
     private static int Portnum = 9090;
     private static int PeerID;
-    public static void main(String[] args) {
+
+    public static void main(String[] args) throws IOException {
         Scanner scanner = new Scanner(System.in);
         System.out.println("请输入自己的IP地址：(默认为127.0.0.1)");
         String inet = scanner.nextLine();
@@ -38,7 +40,7 @@ public class NetworkTest {
             int otherport = scanner.nextInt();
             Client client = new Client(otherAddr,otherport,PeerID);
             tasks.add(client);
-            server.addClient(client);
+            server.powThread.clients.add(client);
             System.out.println("请输入其他peer的peerID(0退出):");
             otherPeerID = scanner.nextInt();
         }

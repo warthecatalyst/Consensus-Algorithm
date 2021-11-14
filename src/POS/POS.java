@@ -1,5 +1,6 @@
 package POS;
 
+import OriginBlock.Algorithm;
 import OriginBlock.OriginBlockChain;
 import POW.POWBlock;
 import util.SHA256;
@@ -15,9 +16,8 @@ class POSConfig{
     final int Scale = 10;
 }
 
-public class POS extends Thread{
+public class POS extends Algorithm {
 
-    public OriginBlockChain chain;
     public CoinPool coinPool;
     POSConfig config = new POSConfig();
 
@@ -40,7 +40,6 @@ public class POS extends Thread{
 
     @Override
     public void run() {
-        super.run();
         chain = new POSBlockChain();
         chain.add(Genesis());
         System.out.println(chain.back());

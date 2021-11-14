@@ -5,7 +5,8 @@ import java.util.Date;
 /**
  * 定义抽象类OriginBlock，3个POX算法的区块都继承该类
  */
-public abstract class OriginBlock {
+
+public abstract class OriginBlock implements java.io.Serializable{
     public final int Index;
     public final Date timeStamp;
     public final String Data;

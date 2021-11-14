@@ -1,5 +1,7 @@
 package DPOS;
 
+
+import OriginBlock.Algorithm;
 import OriginBlock.OriginBlockChain;
 import util.SHA256;
 
@@ -10,7 +12,7 @@ class Config{
     final int delegateNumber = 2;   //每轮产生选举人数
 }
 
-public class DPOS extends Thread{
+public class DPOS extends Algorithm {
     public OriginBlockChain chain;
     Config dposConfig = new Config();
 
@@ -22,17 +24,13 @@ public class DPOS extends Thread{
 
     @Override
     public void run() {
-        super.run();
         chain = new DPOSBlockChain();
         chain.add(Genesis());
-
-
-
     }
 
     public DPOSBlock GenerateBlock(Node blockNode){
         String hash = SHA256.getSHA256(chain.back().Hash+(chain.back().Index + 1));
-       return new DPOSBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,"",new Node());
+        return new DPOSBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,"",new Node());
 
     }
 

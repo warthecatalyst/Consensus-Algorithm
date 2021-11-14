@@ -1,11 +1,10 @@
 package Network;
 
 import OriginBlock.OriginBlock;
-
+import OriginBlock.Algorithm;
 import java.util.*;
 import java.net.*;
 import java.io.*;
-
 
 /**
  * 每个Peer的客户类
@@ -14,6 +13,8 @@ public class Client extends Thread{
     private final String ServerAddr;
     private final int Serverport;
     private final int peerID;
+    private ObjectOutputStream osToServer;
+    private Algorithm algorithm;
     public Client(String ServerAddr,int Serverport,int peerID){
         this.ServerAddr = ServerAddr;
         this.Serverport = Serverport;
@@ -25,22 +26,28 @@ public class Client extends Thread{
         try {
             Socket socket = new Socket(ServerAddr,Serverport);
             BufferedReader isFromServer = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            PrintWriter osToServer = new PrintWriter(socket.getOutputStream(),true);
+            osToServer = new ObjectOutputStream(socket.getOutputStream());
 
             while(true){
-                String msg = "to Server: Hello this is Client "+ peerID;
-                osToServer.println(msg);
-                String res = isFromServer.readLine();
-                System.out.println("Message from Server:"+res);
-                Thread.sleep(1000);
+//                String msg = "to Server: Hello this is Client "+ peerID;
+//                //osToServer.println(msg);
+//                String res = isFromServer.readLine();
+//                System.out.println("Message from Server:"+res);
+//
+//                //挖到矿之后调用send()方法
+//
+//                System.out.println("AWAKE");
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void send(OriginBlock block){
-        
+
+
+    public void send(OriginBlock block) throws IOException {
+        osToServer.writeObject(block);
+
     }
 
     public static void main(String[] args) {
@@ -57,3 +64,4 @@ public class Client extends Thread{
         client.start();
     }
 }
+

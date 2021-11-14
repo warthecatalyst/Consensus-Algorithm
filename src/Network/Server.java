@@ -1,5 +1,8 @@
 package Network;
 
+import DPOS.DPOSBlock;
+import OriginBlock.OriginBlock;
+import POS.POSBlock;
 import POW.POW;
 import POW.POWBlock;
 
@@ -14,47 +17,51 @@ public class Server extends Thread{
     private final String Addr;
     private final int Portnum;
     private final int PeerID;
-    private POW powThread;   //在server线程中启动挖矿线程
-    private List<Client> ClientList;
+    public POW powThread;   //在server线程中启动挖矿线程
+    ObjectInputStream isFromClient;
 
     public Server(String Addr,int Portnum,int peerID){
         this.Addr = Addr;
         this.Portnum = Portnum;
         this.PeerID = peerID;
+
+        //POW
         powThread = new POW();
         powThread.ServerThread = this;
-        powThread.start();
     }
 
     @Override
     public void run() {
+        //启动挖矿
+        powThread.start();
+
         try {
             ServerSocket serverSocket = new ServerSocket(Portnum,3,InetAddress.getByName(Addr));
             Socket socket = serverSocket.accept();
-            BufferedReader isFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            //isFromClient = new ObjectInputStream(socket.getInputStream());
+            isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
             PrintWriter osToClient = new PrintWriter(socket.getOutputStream(),true);
 
-            // Pow
-            POW pow = new POW();
-            pow.start();
             while(true){
-                String res = isFromClient.readLine();
-                System.out.println("result get from client:"+res);
-                String msg = "to client:hello this is Server "+ PeerID;
-                osToClient.println(msg);
+                Object obj = isFromClient.readObject();
+
             }
 
-        } catch (IOException e) {
+        } catch (IOException | ClassNotFoundException e) {
             e.printStackTrace();
         }
     }
 
-    public void getMine(POWBlock mineInform) {
-        System.out.println("getMine:" + mineInform);
-    }
+    private void OnReceive(Object object){
+        if(object instanceof OriginBlock){
+            if(((OriginBlock) object).Verify()){
+                //暂停POX
 
-    public void addClient(Client client) {
-        this.ClientList.add(client);
+                //添加区块
+                powThread.chain.add((OriginBlock) object);
+            }
+        }
+
     }
 
     /**

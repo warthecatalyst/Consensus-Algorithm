@@ -1,5 +1,8 @@
 package Network;
 
+import POW.POW;
+import POW.POWBlock;
+
 import java.io.*;
 import java.util.*;
 import java.net.*;
@@ -11,10 +14,16 @@ public class Server extends Thread{
     private final String Addr;
     private final int Portnum;
     private final int PeerID;
+    private POW powThread;   //在server线程中启动挖矿线程
+    private List<Client> ClientList;
+
     public Server(String Addr,int Portnum,int peerID){
         this.Addr = Addr;
         this.Portnum = Portnum;
         this.PeerID = peerID;
+        powThread = new POW();
+        powThread.ServerThread = this;
+        powThread.start();
     }
 
     @Override
@@ -24,17 +33,28 @@ public class Server extends Thread{
             Socket socket = serverSocket.accept();
             BufferedReader isFromClient = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             PrintWriter osToClient = new PrintWriter(socket.getOutputStream(),true);
+
+            // Pow
+            POW pow = new POW();
+            pow.start();
             while(true){
                 String res = isFromClient.readLine();
                 System.out.println("result get from client:"+res);
                 String msg = "to client:hello this is Server "+ PeerID;
                 osToClient.println(msg);
-
             }
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void getMine(POWBlock mineInform) {
+        System.out.println("getMine:" + mineInform);
+    }
+
+    public void addClient(Client client) {
+        this.ClientList.add(client);
     }
 
     /**

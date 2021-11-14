@@ -27,7 +27,7 @@ public class NetworkTest {
         System.out.println("请输入自己的peerID号:");
         PeerID = scanner.nextInt();
         System.out.println("自己的peerID号为:"+PeerID);
-        Thread server = new Server(InetAddr,Portnum,PeerID);
+        Server server = new Server(InetAddr,Portnum,PeerID);
         List<Thread> tasks = new ArrayList<>();
         System.out.println("请输入其他peer的peerID(0退出):");
         int otherPeerID = scanner.nextInt();
@@ -36,7 +36,9 @@ public class NetworkTest {
             String otherAddr = scanner.next();
             System.out.println("请输入该Peer的端口号:");
             int otherport = scanner.nextInt();
-            tasks.add(new Client(otherAddr,otherport,PeerID));
+            Client client = new Client(otherAddr,otherport,PeerID);
+            tasks.add(client);
+            server.addClient(client);
             System.out.println("请输入其他peer的peerID(0退出):");
             otherPeerID = scanner.nextInt();
         }

@@ -17,7 +17,6 @@ public class POW extends Algorithm {
     public static final int DIF = 4;    //在这个简单的POW系统中，不需要进行难度值的变化
     //public OriginBlockChain chain;
 
-    public Server ServerThread;
     //创建创世区块
     public static POWBlock Genesis(){
         String tmp = SHA256.getSHA256(""+0);

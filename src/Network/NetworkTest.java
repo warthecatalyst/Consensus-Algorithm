@@ -1,5 +1,7 @@
 package Network;
 
+import OriginBlock.Algorithm;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.util.ArrayList;
@@ -40,7 +42,7 @@ public class NetworkTest {
             int otherport = scanner.nextInt();
             Client client = new Client(otherAddr,otherport,PeerID);
             tasks.add(client);
-            server.powThread.clients.add(client);
+            server.poxThread.clients.add(client);
             System.out.println("请输入其他peer的peerID(0退出):");
             otherPeerID = scanner.nextInt();
         }

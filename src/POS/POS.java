@@ -1,11 +1,15 @@
 package POS;
 
+import Network.Server;
 import OriginBlock.Algorithm;
 import OriginBlock.OriginBlockChain;
 import POW.POWBlock;
 import util.SHA256;
 
+import java.io.IOException;
+import java.security.PublicKey;
 import java.util.Date;
+import java.util.IllegalFormatCodePointException;
 import java.util.Random;
 
 class POSConfig{
@@ -26,6 +30,8 @@ public class POS extends Algorithm {
         TempAddress = InetAddr;
     }
 
+    public boolean SuspendFlag = false;
+
     //创建创世区块
     public POSBlock Genesis(){
         //新建币池
@@ -43,7 +49,12 @@ public class POS extends Algorithm {
         chain = new POSBlockChain();
         chain.add(Genesis());
         System.out.println(chain.back());
-        ProofOfStake();
+
+        while (true){
+            if (SuspendFlag == false){
+                ProofOfStake();
+            }
+        }
     }
 
     public void ProofOfStake(){
@@ -56,6 +67,10 @@ public class POS extends Algorithm {
 
         float curCoinAge;
         for (int i = 0; i < coinPool.size(); i++){
+
+            if (SuspendFlag == true)
+                return;
+
             if (coinPool.get(i).time.getTime() + config.MinCoinAge < currentTime ){
                 if (currentTime - coinPool.get(i).time.getTime() < config.MaxCoinAge){
                     curCoinAge = (currentTime - coinPool.get(i).time.getTime());
@@ -83,6 +98,11 @@ public class POS extends Algorithm {
 
         //根据难度来计算
         for(int i = Integer.MIN_VALUE; ; i++){
+
+            if (SuspendFlag == true){
+                return;
+            }
+
             if(isValidNonce(chain.back().Hash,i,realDif)){
                 String tmp = SHA256.getSHA256(chain.back().Hash+i);
                 Random rand = new Random(new Date().getTime());
@@ -92,6 +112,9 @@ public class POS extends Algorithm {
                 System.out.println(newblock);
                 chain.add(newblock);
                 coinPool.add(newOne);
+
+                //发送
+                AwakeClients(newblock);
                 break;
             }
             if(i==Integer.MAX_VALUE){
@@ -102,6 +125,16 @@ public class POS extends Algorithm {
 
     }
 
+    public void AwakeClients(POSBlock block){
+        for (int i = 0; i< clients.size(); i++){
+            try {
+                System.out.println("send");
+                clients.get(i).send(block);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
     private boolean isValidNonce(String Prehash,int nonce, int realDif){
         String cc = Prehash+nonce;

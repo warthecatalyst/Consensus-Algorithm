@@ -33,20 +33,19 @@ public class POW extends Algorithm {
 
     @Override
     public void run() {
-        //先等待1s
-        System.out.println("waiting for other peers to join:");
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-
         //先创造一个区块链和创世区块
         chain = new POWBlockChain();
         chain.add(Genesis());
         System.out.println("创世区块构建完毕：");
         System.out.println(chain.back());
+
+        //等待10s让其他的Peer进来
+        System.out.println("waiting for other peers to join:");
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         //开始挖矿
         while (true){

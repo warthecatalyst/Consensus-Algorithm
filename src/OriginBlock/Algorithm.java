@@ -35,7 +35,7 @@ public abstract class Algorithm extends Thread{
     public abstract void run();
 
     /**
-     * 向其他的Peer发送挖到的矿
+     * 向其他的Peer发送挖到的矿shou
      * @param block
      * @return
      */

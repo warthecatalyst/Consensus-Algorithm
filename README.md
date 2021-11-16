@@ -14,3 +14,20 @@ Blockchain lab for course
 生成共识机制算法线程之后，让Client线程处于休眠状态，不断挖矿，此时会遇到如下两种情况：
 （1）别的Peer先挖到矿，则此时应该在Server线程中接收到新的区块的信息，然后Server线程令共识算法线程休眠，然后Server线程对发送的区块进行判断（抽象Verify方法），如果判断正确加入本地的区块链
 （2）自己先挖到矿，此时唤醒Client线程，让Client线程将挖到矿的资源发过去，然后继续挖矿
+
+
+2021/11/16更新
+上一次舒欢认为client不用作为一个线程，我觉得说的挺对的
+因为本质上client本身就是一个socket,那么为什么不直接在Algorithm里面保存这些socket呢？
+所以我在Algorithm类中加入了两个类成员变量，一个是自己当前的PeerID，一个是用于存储Client Socket的list
+然后新添加了一个抽象的sendToServers(OriginBlock block)方法,这个方法用于向其他的Server传递挖到的矿的信息
+这样就不需要让Algorithm线程wake Client线程
+
+那么现在本质上我们就是两个主要线程了，线程Server和Algorithm（当然不同算法可能需要再开一些线程）
+
+(1)线程Server是服务器线程，这个线程一直在运行并且处于等待Client发消息的状态
+
+(2)线程Algorithm是运行具体算法的线程，处于两种情况：情况1：别的Peer没有挖到矿，该线程一直处于挖矿状态，一旦挖到矿就把矿传给其他的Peer
+情况2：别的Peer先挖到矿，那么当前停止挖矿，直到Server验证结束之后才开始挖矿
+
+基于以上分析，我认为Algorithm线程中应该不需要Server线程的对象，但是Server线程中需要Algorithm线程的对象

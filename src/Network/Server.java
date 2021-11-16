@@ -24,10 +24,6 @@ public class Server extends Thread{
         this.Addr = Addr;
         this.Portnum = Portnum;
         this.PeerID = peerID;
-
-        //POW
-        powThread = new POW();
-        powThread.ServerThread = this;
     }
 
     @Override

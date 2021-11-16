@@ -2,10 +2,13 @@ package DPOS;
 
 
 import OriginBlock.Algorithm;
+import OriginBlock.OriginBlock;
 import OriginBlock.OriginBlockChain;
 import util.SHA256;
 
+import java.net.Socket;
 import java.util.Date;
+import java.util.List;
 
 class Config{
     int round = 0;  //轮次
@@ -15,6 +18,10 @@ class Config{
 public class DPOS extends Algorithm {
     public OriginBlockChain chain;
     Config dposConfig = new Config();
+
+    public DPOS(int PeerID, List<Socket> socketList) {
+        super(PeerID, socketList);
+    }
 
     //创建创世区块
     public static DPOSBlock Genesis(){
@@ -26,6 +33,11 @@ public class DPOS extends Algorithm {
     public void run() {
         chain = new DPOSBlockChain();
         chain.add(Genesis());
+    }
+
+    @Override
+    protected boolean sendToServers(OriginBlock block) {
+        return false;
     }
 
     public DPOSBlock GenerateBlock(Node blockNode){

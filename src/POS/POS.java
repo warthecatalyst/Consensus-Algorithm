@@ -1,11 +1,14 @@
 package POS;
 
 import OriginBlock.Algorithm;
+import OriginBlock.OriginBlock;
 import OriginBlock.OriginBlockChain;
 import POW.POWBlock;
 import util.SHA256;
 
+import java.net.Socket;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 class POSConfig{
@@ -22,7 +25,8 @@ public class POS extends Algorithm {
     POSConfig config = new POSConfig();
 
     String TempAddress = "";
-    public POS(String InetAddr){
+    public POS(int PeerID, List<Socket> socketList, String InetAddr){
+        super(PeerID,socketList);
         TempAddress = InetAddr;
     }
 
@@ -44,6 +48,11 @@ public class POS extends Algorithm {
         chain.add(Genesis());
         System.out.println(chain.back());
         ProofOfStake();
+    }
+
+    @Override
+    protected boolean sendToServers(OriginBlock block) {
+        return false;
     }
 
     public void ProofOfStake(){

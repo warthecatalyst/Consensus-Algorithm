@@ -1,7 +1,11 @@
 package Network;
 
+import OriginBlock.Algorithm;
+import POW.POW;
+
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -30,7 +34,7 @@ public class NetworkTest {
         PeerID = scanner.nextInt();
         System.out.println("自己的peerID号为:"+PeerID);
         Server server = new Server(InetAddr,Portnum,PeerID);
-        List<Thread> tasks = new ArrayList<>();
+        List<Socket> socketList = new ArrayList<>();
         System.out.println("请输入其他peer的peerID(0退出):");
         int otherPeerID = scanner.nextInt();
         while(otherPeerID!=0){
@@ -38,15 +42,13 @@ public class NetworkTest {
             String otherAddr = scanner.next();
             System.out.println("请输入该Peer的端口号:");
             int otherport = scanner.nextInt();
-            Client client = new Client(otherAddr,otherport,PeerID);
-            tasks.add(client);
-            server.powThread.clients.add(client);
+            Socket socket = new Socket(otherAddr,otherport);
+            socketList.add(socket);
             System.out.println("请输入其他peer的peerID(0退出):");
             otherPeerID = scanner.nextInt();
         }
-        for(Thread task:tasks){
-            task.start();
-        }
+        Algorithm pow = new POW(PeerID,socketList);
+        pow.start();
         server.start();
     }
 }

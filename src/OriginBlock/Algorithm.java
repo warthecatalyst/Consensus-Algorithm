@@ -1,7 +1,9 @@
 package OriginBlock;
 
-import POW.POWBlockChain;
 
+import POW.POWBlockChain;
+import Network.Client;
+import Network.Server;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,18 +17,20 @@ import java.util.List;
 public abstract class Algorithm extends Thread{
     protected final int PeerID;
     public OriginBlockChain chain;
+    public Server serverThread;
     public List<Socket> clients;
 
     /**
      * Algorithm类的构造函数
      * @param PeerID 当前Peer的ID
      * @param socketList 存储发送给其他Peer的clientSockets
+     * @param serverThread 存储Server线程
      */
-    public Algorithm(int PeerID,List<Socket> socketList){
+    public Algorithm(int PeerID,List<Socket> socketList,Server serverThread){
         this.PeerID = PeerID;
         this.clients = socketList;
+        this.serverThread = serverThread;
     }
-
     @Override
     public abstract void run();
 

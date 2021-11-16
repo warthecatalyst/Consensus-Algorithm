@@ -10,7 +10,7 @@ import java.io.*;
  * 每个Peer的客户类
  */
 public class Client extends Thread{
-    private final String ServerAddr;
+    public final String ServerAddr;
     private final int Serverport;
     private final int peerID;
     private ObjectOutputStream osToServer;
@@ -47,7 +47,6 @@ public class Client extends Thread{
 
     public void send(OriginBlock block) throws IOException {
         osToServer.writeObject(block);
-
     }
 
     public static void main(String[] args) {

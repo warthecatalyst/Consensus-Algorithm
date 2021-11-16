@@ -19,14 +19,14 @@ class Config{
 public class DPOS extends Algorithm {
 
     Config dposConfig = new Config();
-
+    String InetAddr = "";
     //统计计票
     private List<Node> VotePool = new ArrayList<Node>();
     private int MyIndexThisRound = -1;
     private int Pointer = 0;
 
-    public DPOS(int PeerID, List<Socket> socketList,Server serverThread) {
-        super(PeerID, socketList,serverThread);
+    public DPOS(int PeerID, List<Socket> socketList) {
+        super(PeerID, socketList);
     }
 
     //创建创世区块
@@ -60,7 +60,7 @@ public class DPOS extends Algorithm {
         for (int i = 0;i < clients.size();i++){
             ipAddress.add(clients.get(i).getInetAddress().toString());
         }
-        ipAddress.add(serverThread.Addr);
+        ipAddress.add(InetAddr);
         Random rand = new Random(new Date().getTime());
         int randNumber = rand.nextInt(clients.size());
         Node vote = new Node(ipAddress.get(randNumber),1,round);
@@ -124,7 +124,7 @@ public class DPOS extends Algorithm {
                 //检查是否有自己
                 for (int i = 0;i < dposConfig.delegateNumber;i++){
                     VotePool.add(list.get(i).getKey());
-                    if (list.get(i).getKey().AddressName == serverThread.Addr){
+                    if (list.get(i).getKey().AddressName == InetAddr){
                         if (i == 0){
                             //由我先产生一个区块
                             SendGenerateBlock(list.get(i).getKey());

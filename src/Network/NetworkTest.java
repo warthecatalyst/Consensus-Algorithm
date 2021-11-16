@@ -16,7 +16,7 @@ public class NetworkTest {
     private static int Portnum = 9090;
     private static int PeerID;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args){
         Scanner scanner = new Scanner(System.in);
         System.out.println("请输入自己的IP地址：(默认为127.0.0.1)");
         String inet = scanner.nextLine();
@@ -33,8 +33,11 @@ public class NetworkTest {
         System.out.println("请输入自己的peerID号:");
         PeerID = scanner.nextInt();
         System.out.println("自己的peerID号为:"+PeerID);
-        Server server = new Server(InetAddr,Portnum,PeerID);
-        List<Socket> socketList = new ArrayList<>();
+
+        Algorithm pow = new POW(PeerID,new ArrayList<>());
+        Server server = new Server(InetAddr,Portnum,PeerID,pow);
+        server.start();
+
         System.out.println("请输入其他peer的peerID(0退出):");
         int otherPeerID = scanner.nextInt();
         while(otherPeerID!=0){
@@ -42,13 +45,16 @@ public class NetworkTest {
             String otherAddr = scanner.next();
             System.out.println("请输入该Peer的端口号:");
             int otherport = scanner.nextInt();
-            Socket socket = new Socket(otherAddr,otherport);
-            socketList.add(socket);
+            Socket socket = null;
+            try {
+                socket = new Socket(otherAddr,otherport);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            pow.clients.add(socket);
             System.out.println("请输入其他peer的peerID(0退出):");
             otherPeerID = scanner.nextInt();
         }
-        Algorithm pow = new POW(PeerID,socketList);
         pow.start();
-        server.start();
     }
 }

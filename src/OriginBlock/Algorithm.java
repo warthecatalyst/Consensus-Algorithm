@@ -15,21 +15,18 @@ import java.util.List;
  * 这样就不必在算法线程执行过程中通知Client线程执行，只需要发送即可
  */
 public abstract class Algorithm extends Thread{
-    protected final int PeerID;
+    protected int PeerID;
     public OriginBlockChain chain;
-    public Server serverThread;
     public List<Socket> clients;
-
+    public boolean isWaiting = false;
     /**
      * Algorithm类的构造函数
      * @param PeerID 当前Peer的ID
      * @param socketList 存储发送给其他Peer的clientSockets
-     * @param serverThread 存储Server线程
      */
-    public Algorithm(int PeerID,List<Socket> socketList,Server serverThread){
+    public Algorithm(int PeerID,List<Socket> socketList){
         this.PeerID = PeerID;
         this.clients = socketList;
-        this.serverThread = serverThread;
     }
     @Override
     public abstract void run();
@@ -40,4 +37,5 @@ public abstract class Algorithm extends Thread{
      * @return
      */
     protected abstract boolean sendToServers(OriginBlock block);
+
 }

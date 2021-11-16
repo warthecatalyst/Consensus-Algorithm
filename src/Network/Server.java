@@ -20,33 +20,32 @@ public class Server extends Thread{
     public final String Addr;
     private final int Portnum;
     private final int PeerID;
-    public Algorithm poxThread;   //在server线程中启动挖矿线程
+    public final Algorithm poxThread;   //在server线程中启动挖矿线程
     ObjectInputStream isFromClient;
 
-    public Server(String Addr,int Portnum,int peerID){
+    public Server(String Addr,int Portnum,int peerID,Algorithm poxThread){
         this.Addr = Addr;
         this.Portnum = Portnum;
         this.PeerID = peerID;
+        this.poxThread = poxThread;
     }
 
     @Override
     public void run() {
-        //启动挖矿
-//        powThread.start();
-        poxThread.start();
-
         try {
             ServerSocket serverSocket = new ServerSocket(Portnum,3,InetAddress.getByName(Addr));
             Socket socket = serverSocket.accept();
-            //isFromClient = new ObjectInputStream(socket.getInputStream());
             isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
-            PrintWriter osToClient = new PrintWriter(socket.getOutputStream(),true);
 
             while(true){
                 Object obj = isFromClient.readObject();
-                OnReceive(obj);
+                System.out.println("read from other peer");
+                synchronized (poxThread){
+                    poxThread.wait();
+                    OnReceive(obj);
+                    poxThread.notify();
+                }
             }
-
         } catch (IOException | ClassNotFoundException | InterruptedException e) {
             e.printStackTrace();
         }
@@ -55,7 +54,6 @@ public class Server extends Thread{
     private void OnReceive(Object object) throws InterruptedException {
         if(object instanceof OriginBlock){
             if(((OriginBlock) object).Verify()){
-
                 if (object instanceof DPOSBlock){
                     ((DPOS)poxThread).VerifyBlock((DPOSBlock) object);
                 }else if(object instanceof POWBlock){
@@ -66,10 +64,10 @@ public class Server extends Thread{
                     Thread.sleep(5);
                     ((POS)poxThread).SuspendFlag = false;
                 }
-
             }
+        }else{
+            System.err.println("Something goes wrong in OnReceive()----Wrong Type!");
         }
-
     }
 
     //设置一下一个Suspend的参数，然后根据悬停的情况来中止当前挖矿的执行
@@ -86,7 +84,7 @@ public class Server extends Thread{
         System.out.println("请输入自己的端口号");
         Portnum = scanner.nextInt();
 
-        Server server = new Server(Addr,Portnum,1);
-        server.start();
+        //Server server = new Server(Addr,Portnum,1);
+        //server.start();
     }
 }

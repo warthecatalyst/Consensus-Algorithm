@@ -27,10 +27,10 @@ public class POS extends Algorithm {
 
     public CoinPool coinPool;
     POSConfig config = new POSConfig();
-
     String TempAddress = "";
-    public POS(int PeerID, List<Socket> socketList,Server serverThread,String InetAddr){
-        super(PeerID,socketList,serverThread);
+
+    public POS(int PeerID, List<Socket> socketList,String InetAddr){
+        super(PeerID,socketList);
         TempAddress = InetAddr;
     }
 

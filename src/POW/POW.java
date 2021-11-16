@@ -9,6 +9,7 @@ import util.SHA256;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.Date;
 import java.util.List;
@@ -19,9 +20,8 @@ import java.util.Scanner;
  */
 public class POW extends Algorithm {
     public static final int DIF = 4;    //在这个简单的POW系统中，不需要进行难度值的变化
-
-    public POW(int PeerID, List<Socket> socketList,Server server){
-        super(PeerID,socketList,server);
+    public POW(int PeerID, List<Socket> socketList){
+        super(PeerID,socketList);
     }
 
     //创建创世区块
@@ -32,7 +32,6 @@ public class POW extends Algorithm {
 
     @Override
     public void run() {
-        Scanner scanner = new Scanner(System.in);
         //先创造一个区块链和创世区块
         chain = new POWBlockChain();
         chain.add(Genesis());
@@ -41,21 +40,28 @@ public class POW extends Algorithm {
 
         //开始挖矿
         while (true){
-            for(int i = Integer.MIN_VALUE; ; i++){
+            //产生随机数
+            int random = (int) (Math.random()*12888);
+            int i = random;
+            while(true){
                 if(isValidNonce(chain.back().Hash,i)){
                     String tmp = SHA256.getSHA256(chain.back().Hash+i);
                     POWBlock newBlock = new POWBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,tmp,DIF,i);
                     System.out.println("挖到新区块:"+newBlock);
                     chain.add(newBlock);
-                    //让clients发送给Server
+                    //挖到矿发送给其他的Servers
                     if(sendToServers(newBlock)){
                         break;
                     }
                 }
                 if(i==Integer.MAX_VALUE){
+                    i = Integer.MIN_VALUE;
+                }else{
+                    i++;
+                }
+                if(i==random){
                     break;
                 }
-                i++;
             }
         }
     }
@@ -64,8 +70,9 @@ public class POW extends Algorithm {
     protected boolean sendToServers(OriginBlock block) {
         for(Socket socket:clients){
             try {
+                System.out.println("Send to server:"+socket.getInetAddress());
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                outputStream.writeObject("Block from Peer:"+PeerID);
+                //outputStream.writeObject("Block from Peer:"+PeerID+"\n"+block.toString());
                 outputStream.writeObject(block);
             } catch (IOException e) {
                 e.printStackTrace();

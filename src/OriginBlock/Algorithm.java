@@ -18,7 +18,7 @@ public abstract class Algorithm extends Thread{
     protected int PeerID;
     public OriginBlockChain chain;
     public List<Socket> clients;
-    public boolean isWaiting = false;
+    protected boolean isWaiting = false;   //判断当前线程是否处于等待状态
     /**
      * Algorithm类的构造函数
      * @param PeerID 当前Peer的ID
@@ -38,4 +38,17 @@ public abstract class Algorithm extends Thread{
      */
     protected abstract boolean sendToServers(OriginBlock block);
 
+    /**
+     * 让线程处于等待状态
+     */
+    public void Suspend(){
+        this.isWaiting = true;
+    }
+
+    /**
+     * 让线程继续执行
+     */
+    public void Continue(){
+        this.isWaiting = false;
+    }
 }

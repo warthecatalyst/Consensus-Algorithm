@@ -41,7 +41,7 @@ public class Server extends Thread{
                 Object obj = isFromClient.readObject();
                 System.out.println("read from other peer");
                 synchronized (poxThread){
-                    poxThread.wait();
+                    poxThread.yield();
                     OnReceive(obj);
                     poxThread.notify();
                 }

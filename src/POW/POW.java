@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.StandardSocketOptions;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
@@ -32,6 +33,15 @@ public class POW extends Algorithm {
 
     @Override
     public void run() {
+        //先等待1s
+        System.out.println("waiting for other peers to join:");
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
+
         //先创造一个区块链和创世区块
         chain = new POWBlockChain();
         chain.add(Genesis());
@@ -40,29 +50,7 @@ public class POW extends Algorithm {
 
         //开始挖矿
         while (true){
-            //产生随机数
-            int random = (int) (Math.random()*12888);
-            int i = random;
-            while(true){
-                if(isValidNonce(chain.back().Hash,i)){
-                    String tmp = SHA256.getSHA256(chain.back().Hash+i);
-                    POWBlock newBlock = new POWBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,tmp,DIF,i);
-                    System.out.println("挖到新区块:"+newBlock);
-                    chain.add(newBlock);
-                    //挖到矿发送给其他的Servers
-                    if(sendToServers(newBlock)){
-                        break;
-                    }
-                }
-                if(i==Integer.MAX_VALUE){
-                    i = Integer.MIN_VALUE;
-                }else{
-                    i++;
-                }
-                if(i==random){
-                    break;
-                }
-            }
+            ProofOfWork();
         }
     }
 
@@ -90,5 +78,30 @@ public class POW extends Algorithm {
             }
         }
         return true;
+    }
+
+    private void ProofOfWork(){
+        int random = (int) (Math.random()*12888);
+        int i = random;
+        while(true){
+            if(isValidNonce(chain.back().Hash,i)){
+                String tmp = SHA256.getSHA256(chain.back().Hash+i);
+                POWBlock newBlock = new POWBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,tmp,DIF,i);
+                System.out.println("挖到新区块:"+newBlock);
+                chain.add(newBlock);
+                //挖到矿发送给其他的Servers
+                if(sendToServers(newBlock)){
+                    break;
+                }
+            }
+            if(i==Integer.MAX_VALUE){
+                i = Integer.MIN_VALUE;
+            }else{
+                i++;
+            }
+            if(i==random){
+                break;
+            }
+        }
     }
 }

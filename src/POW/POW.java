@@ -65,12 +65,14 @@ public class POW extends Algorithm {
         for(Socket socket:clients){
             try {
                 ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                outputStream.writeObject("Block from Peer:"+PeerID);
                 outputStream.writeObject(block);
             } catch (IOException e) {
                 e.printStackTrace();
+                return false;
             }
         }
-        return false;
+        return true;
     }
 
     private boolean isValidNonce(String Prehash, int nonce){

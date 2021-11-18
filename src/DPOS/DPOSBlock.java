@@ -3,7 +3,7 @@ package DPOS;
 import OriginBlock.OriginBlock;
 import java.util.Date;
 
-class Node{
+class Node implements Comparable<Node>,java.io.Serializable{
     String AddressName;
     int voteNumber;
     int round;
@@ -22,6 +22,12 @@ class Node{
     public boolean equals(Object obj) {
         return this.round == ((Node)obj).round && this.voteNumber == ((Node)obj).voteNumber && this.AddressName == ((Node)obj).AddressName;
     }
+
+
+    @Override
+    public int compareTo(Node o) {
+        return this.voteNumber - o.voteNumber;
+    }
 }
 
 public class DPOSBlock extends OriginBlock {
@@ -36,5 +42,19 @@ public class DPOSBlock extends OriginBlock {
     @Override
     public boolean Verify() {
         return true;
+    }
+
+    @Override
+    public String toString() {
+        return "DPOSBlock{" +
+                ", Index=" + Index +
+                ", timeStamp=" + timeStamp +
+                ", Data='" + Data + '\'' +
+                ", Hash='" + Hash + '\'' +
+                ", blockNode.AddressName='" + blockNode.AddressName + '\'' +
+                ", blockNode.voteNumber='" + blockNode.voteNumber + '\'' +
+                ", blockNode.round='" + blockNode.round + '\'' +
+                ", Prehash='" + Prehash + '\'' +
+                '}';
     }
 }

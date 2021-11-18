@@ -6,7 +6,7 @@ import util.SHA256;
 import java.util.ArrayList;
 import java.util.Date;
 
-class Coin{
+class Coin implements java.io.Serializable{
     Date time;
     int coinNumber;
     String Address;
@@ -51,5 +51,21 @@ public class POSBlock extends OriginBlock {
         System.out.println("Verifying SHA256 Hash:"+cur);
         System.out.println("Current SHA256 Hash:"+Hash);
         return cur.equals(Hash);
+    }
+
+    @Override
+    public String toString() {
+        return "POSBlock{" +
+                "difficulty=" + difficulty +
+                ", nonce=" + nonce +
+                ", Index=" + Index +
+                ", timeStamp=" + timeStamp +
+                ", Data='" + Data + '\'' +
+                ", Hash='" + Hash + '\'' +
+                ", coin.Address='" + coin.Address + '\'' +
+                ", coin.coinNumber='" + coin.coinNumber + '\'' +
+                ", coin.time='" + coin.time + '\'' +
+                ", Prehash='" + Prehash + '\'' +
+                '}';
     }
 }

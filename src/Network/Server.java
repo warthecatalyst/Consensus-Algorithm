@@ -35,9 +35,10 @@ public class Server extends Thread{
         try {
             ServerSocket serverSocket = new ServerSocket(Portnum,3,InetAddress.getByName(Addr));
             Socket socket = serverSocket.accept();
-            isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+            //isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 
             while(true){
+                isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
                 Object obj = isFromClient.readObject();
                 System.out.println("read from other peer");
                 synchronized (poxThread){
@@ -59,10 +60,10 @@ public class Server extends Thread{
                 }else if(object instanceof POWBlock){
                     poxThread.chain.add((POWBlock) object);
                 }else if(object instanceof POSBlock){
-                    ((POS)poxThread).SuspendFlag = true;
+                    //((POS)poxThread).SuspendFlag = true;
                     poxThread.chain.add((POSBlock) object);
-                    Thread.sleep(5);
-                    ((POS)poxThread).SuspendFlag = false;
+                    //Thread.sleep(5);
+                    //((POS)poxThread).SuspendFlag = false;
                 }
             }
         }else{

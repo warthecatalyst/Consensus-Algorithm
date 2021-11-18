@@ -5,6 +5,8 @@ import OriginBlock.Algorithm;
 import OriginBlock.OriginBlock;
 import OriginBlock.OriginBlockChain;
 import util.SHA256;
+
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.*;
 
@@ -25,8 +27,9 @@ public class DPOS extends Algorithm {
     private int MyIndexThisRound = -1;
     private int Pointer = 0;
 
-    public DPOS(int PeerID, List<Socket> socketList) {
+    public DPOS(int PeerID, List<Socket> socketList,String Address) {
         super(PeerID, socketList);
+        this.InetAddr = Address;
     }
 
     //创建创世区块
@@ -39,17 +42,37 @@ public class DPOS extends Algorithm {
     public void run() {
         chain = new DPOSBlockChain();
         chain.add(Genesis());
+
+        //开始投票
+        SendVoteBlock();
+
+        while (true){
+
+        }
     }
 
     @Override
     protected boolean sendToServers(OriginBlock block) {
-        return false;
+
+        for(Socket socket:clients){
+            try {
+                System.out.println("Send to server:"+socket.getInetAddress());
+                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                //outputStream.writeObject("Block from Peer:"+PeerID+"\n"+block.toString());
+                outputStream.writeObject(block);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
     }
 
     public DPOSBlock GenerateBlock(Node blockNode){
         String hash = SHA256.getSHA256(chain.back().Hash+(chain.back().Index + 1));
         DPOSBlock block = new DPOSBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,"",blockNode);
         chain.add(block);
+        System.out.println(block);
         return block;
     }
 
@@ -62,7 +85,7 @@ public class DPOS extends Algorithm {
         }
         ipAddress.add(InetAddr);
         Random rand = new Random(new Date().getTime());
-        int randNumber = rand.nextInt(clients.size());
+        int randNumber = rand.nextInt(clients.size() + 1);
         Node vote = new Node(ipAddress.get(randNumber),1,round);
         //index为-1的区块为投票信息
         return new DPOSBlock(-1,new Date(),"","","",vote);
@@ -72,6 +95,7 @@ public class DPOS extends Algorithm {
     public void SendVoteBlock(){
         //产生此轮的投票信息
         DPOSBlock voteBlock = Vote(dposConfig.round);
+        System.out.println(voteBlock);
         //加入此轮的投票池
         VoteManager(voteBlock.blockNode);
 
@@ -122,7 +146,8 @@ public class DPOS extends Algorithm {
 
                 VotePool.clear();
                 //检查是否有自己
-                for (int i = 0;i < dposConfig.delegateNumber;i++){
+                int LoopNumber = dposConfig.delegateNumber < list.size() ? dposConfig.delegateNumber : list.size();
+                for (int i = 0;i < LoopNumber;i++){
                     VotePool.add(list.get(i).getKey());
                     if (list.get(i).getKey().AddressName == InetAddr){
                         if (i == 0){

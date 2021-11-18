@@ -7,6 +7,7 @@ import OriginBlock.OriginBlockChain;
 import POW.POWBlock;
 import util.SHA256;
 
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.io.IOException;
 import java.security.PublicKey;
@@ -17,7 +18,7 @@ import java.util.Random;
 
 class POSConfig{
     final int MaxProbably = 255;
-    final int MinProbably = 240;
+    final int MinProbably = 245;
     final int MinCoinAge = 5;   //ms
     final int MaxCoinAge = 30;  //ms
     final int Scale = 10;
@@ -55,15 +56,26 @@ public class POS extends Algorithm {
         System.out.println(chain.back());
 
         while (true){
-            if (SuspendFlag == false){
+            //if (SuspendFlag == false){
                 ProofOfStake();
-            }
+            //}
         }
     }
 
     @Override
     protected boolean sendToServers(OriginBlock block) {
-        return false;
+        for(Socket socket:clients){
+            try {
+                System.out.println("Send to server:"+socket.getInetAddress());
+                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
+                //outputStream.writeObject("Block from Peer:"+PeerID+"\n"+block.toString());
+                outputStream.writeObject(block);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
+        return true;
     }
 
     public void ProofOfStake(){
@@ -77,8 +89,8 @@ public class POS extends Algorithm {
         float curCoinAge;
         for (int i = 0; i < coinPool.size(); i++){
 
-            if (SuspendFlag == true)
-                return;
+            //if (SuspendFlag == true)
+            //    return;
 
             if (coinPool.get(i).time.getTime() + config.MinCoinAge < currentTime ){
                 if (currentTime - coinPool.get(i).time.getTime() < config.MaxCoinAge){
@@ -106,30 +118,58 @@ public class POS extends Algorithm {
         System.out.print("realDif: "+realDif);
 
         //根据难度来计算
-        for(int i = Integer.MIN_VALUE; ; i++){
+//        for(int i = Integer.MIN_VALUE; ; i++){
+//
+//            if (SuspendFlag == true){
+//                return;
+//            }
+//
+//            if(isValidNonce(chain.back().Hash,i,realDif)){
+//                String tmp = SHA256.getSHA256(chain.back().Hash+i);
+//                Random rand = new Random(new Date().getTime());
+//                int CoinNumber = rand.nextInt(3) + 2;
+//                Coin newOne = new Coin(new Date(),CoinNumber,TempAddress);
+//                POSBlock newblock = new POSBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,tmp,realDif,i,newOne);
+//                System.out.println(newblock);
+//                chain.add(newblock);
+//                coinPool.add(newOne);
+//
+//                //发送
+//                AwakeClients(newblock);
+//                break;
+//            }
+//            if(i==Integer.MAX_VALUE){
+//                break;
+//            }
+//            i++;
+//        }
 
-            if (SuspendFlag == true){
-                return;
-            }
-
+        //根据real难度来POW
+        int random = (int) (Math.random()*12888);
+        int i = random;
+        while(true){
             if(isValidNonce(chain.back().Hash,i,realDif)){
                 String tmp = SHA256.getSHA256(chain.back().Hash+i);
                 Random rand = new Random(new Date().getTime());
                 int CoinNumber = rand.nextInt(3) + 2;
                 Coin newOne = new Coin(new Date(),CoinNumber,TempAddress);
-                POSBlock newblock = new POSBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,tmp,realDif,i,newOne);
-                System.out.println(newblock);
-                chain.add(newblock);
+                POSBlock newBlock = new POSBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,tmp,realDif,i,newOne);
+                System.out.println("挖到新区块:"+newBlock);
+                chain.add(newBlock);
                 coinPool.add(newOne);
-
-                //发送
-                AwakeClients(newblock);
-                break;
+                //挖到矿发送给其他的Servers
+                if(sendToServers(newBlock)){
+                    break;
+                }
             }
             if(i==Integer.MAX_VALUE){
+                i = Integer.MIN_VALUE;
+            }else{
+                i++;
+            }
+            if(i==random){
                 break;
             }
-            i++;
         }
 
     }

@@ -2,6 +2,8 @@ package Network;
 
 import OriginBlock.Algorithm;
 import POW.POW;
+import POS.POS;
+import DPOS.DPOS;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -34,6 +36,7 @@ public class NetworkTest {
         PeerID = scanner.nextInt();
         System.out.println("自己的peerID号为:"+PeerID);
 
+        //Algorithm pow = new POW(PeerID,new ArrayList<>());
         Algorithm pow = new POW(PeerID,new ArrayList<>());
         Server server = new Server(InetAddr,Portnum,PeerID,pow);
         server.start();

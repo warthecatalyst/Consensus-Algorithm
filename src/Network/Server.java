@@ -65,6 +65,7 @@ public class Server extends Thread{
                     //Thread.sleep(5);
                     //((POS)poxThread).SuspendFlag = false;
                 }
+                System.out.println("Block added to chain:\n"+poxThread.chain.back());
             }
         }else{
             System.err.println("Something goes wrong in OnReceive()----Wrong Type!");

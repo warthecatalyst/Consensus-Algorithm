@@ -60,7 +60,7 @@ public class Server extends Thread{
                 }else if(object instanceof POWBlock){
                     poxThread.chain.add((POWBlock) object);
                 }else if(object instanceof POSBlock){
-                    //((POS)poxThread).SuspendFlag = true;
+                    ((POS)poxThread).JumpToNextRound = true;
                     poxThread.chain.add((POSBlock) object);
                     //Thread.sleep(5);
                     //((POS)poxThread).SuspendFlag = false;

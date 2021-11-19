@@ -11,14 +11,11 @@ import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.io.IOException;
 import java.security.PublicKey;
-import java.util.Date;
-import java.util.IllegalFormatCodePointException;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 class POSConfig{
     final int MaxProbably = 255;
-    final int MinProbably = 245;
+    final int MinProbably = 250;
     final int MinCoinAge = 5;   //ms
     final int MaxCoinAge = 30;  //ms
     final int Scale = 10;
@@ -35,7 +32,7 @@ public class POS extends Algorithm {
         TempAddress = InetAddr;
     }
 
-    public boolean SuspendFlag = false;
+    public boolean JumpToNextRound = false;
 
     //创建创世区块
     public POSBlock Genesis(){
@@ -56,9 +53,7 @@ public class POS extends Algorithm {
         System.out.println(chain.back());
 
         while (true){
-            //if (SuspendFlag == false){
-                ProofOfStake();
-            //}
+            ProofOfStake();
         }
     }
 
@@ -84,13 +79,14 @@ public class POS extends Algorithm {
         int realDif = config.MinProbably;
         long currentTime = new Date().getTime();
 
-        //System.out.println("coinPool.size(): "+coinPool.size());
+        //设置Dirty值，标注参与币龄计算的币
+        ArrayList<Boolean> DirtyCoin = new ArrayList<>();
+        for (int i = 0 ;i < coinPool.size(); i++){
+            DirtyCoin.add(false);
+        }
 
         float curCoinAge;
         for (int i = 0; i < coinPool.size(); i++){
-
-            //if (SuspendFlag == true)
-            //    return;
 
             if (coinPool.get(i).time.getTime() + config.MinCoinAge < currentTime ){
                 if (currentTime - coinPool.get(i).time.getTime() < config.MaxCoinAge){
@@ -104,15 +100,18 @@ public class POS extends Algorithm {
                 System.out.println("coinAge:  "+coinAge);
 
                 //参与挖矿的币龄置为0
-                coinPool.get(i).time = new Date();
+                //coinPool.get(i).time = new Date();
+
+                //参与计算的币被标注为dirty
+                DirtyCoin.set(i,true);
             }
         }
 
         //根据币龄计算难度
         if (realDif + coinAge / config.Scale > config.MaxProbably){
-            realDif = 255 - config.MaxProbably;
+            realDif = 260 - config.MaxProbably;
         }else{
-            realDif = 255 - realDif - (int)coinAge / config.Scale;
+            realDif = 260 - realDif - (int)coinAge / config.Scale;
         }
 
         System.out.print("realDif: "+realDif);
@@ -144,10 +143,18 @@ public class POS extends Algorithm {
 //            i++;
 //        }
 
+        //JumpToNextRound
+        JumpToNextRound = false;
         //根据real难度来POW
         int random = (int) (Math.random()*12888);
         int i = random;
         while(true){
+            //如果收到了其他节点的挖到矿的信息
+            if (JumpToNextRound == true){
+                JumpToNextRound = false;
+                break;
+            }
+
             if(isValidNonce(chain.back().Hash,i,realDif)){
                 String tmp = SHA256.getSHA256(chain.back().Hash+i);
                 Random rand = new Random(new Date().getTime());
@@ -157,6 +164,14 @@ public class POS extends Algorithm {
                 System.out.println("挖到新区块:"+newBlock);
                 chain.add(newBlock);
                 coinPool.add(newOne);
+
+                //将参与生成区块的币龄清空
+                for(int j = 0; j < DirtyCoin.size();j++){
+                    if (DirtyCoin.get(j) == true){
+                        coinPool.get(j).time = new Date();
+                    }
+                }
+
                 //挖到矿发送给其他的Servers
                 if(sendToServers(newBlock)){
                     break;

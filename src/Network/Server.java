@@ -56,7 +56,13 @@ public class Server extends Thread{
         if(object instanceof OriginBlock){
             if(((OriginBlock) object).Verify()){
                 if (object instanceof DPOSBlock){
-                    ((DPOS)poxThread).VerifyBlock((DPOSBlock) object);
+                    DPOSBlock dposBlock = (DPOSBlock) object;
+                    if(DPOS.isVote(dposBlock)){
+                        ((DPOS) poxThread).VotePool.add(dposBlock.blockNode);
+                    }else{
+                        poxThread.chain.add(dposBlock);
+                        ((DPOS) poxThread).Pointer++;
+                    }
                 }else if(object instanceof POWBlock){
                     poxThread.chain.add((POWBlock) object);
                 }else if(object instanceof POSBlock){

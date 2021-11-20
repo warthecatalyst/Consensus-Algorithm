@@ -43,6 +43,12 @@ public class DPOS extends Algorithm {
         chain = new DPOSBlockChain();
         chain.add(Genesis());
 
+        try {
+            Thread.sleep(3000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
         //开始投票
         SendVoteBlock();
 
@@ -72,7 +78,7 @@ public class DPOS extends Algorithm {
         String hash = SHA256.getSHA256(chain.back().Hash+(chain.back().Index + 1));
         DPOSBlock block = new DPOSBlock(chain.back().Index + 1,new Date(),"",chain.back().Hash,"",blockNode);
         chain.add(block);
-        System.out.println(block);
+        System.out.println("Generate block: "+block);
         return block;
     }
 
@@ -81,7 +87,12 @@ public class DPOS extends Algorithm {
         //随机获取一个ip
         List<String> ipAddress = new ArrayList<>();
         for (int i = 0;i < clients.size();i++){
-            ipAddress.add(clients.get(i).getInetAddress().toString());
+            if (clients.get(i).getInetAddress().toString().charAt(0) == '/'){
+                String addr = clients.get(i).getInetAddress().toString().substring(1);
+                ipAddress.add(addr);
+            }else{
+                ipAddress.add(clients.get(i).getInetAddress().toString());
+            }
         }
         ipAddress.add(InetAddr);
         Random rand = new Random(new Date().getTime());
@@ -95,12 +106,12 @@ public class DPOS extends Algorithm {
     public void SendVoteBlock(){
         //产生此轮的投票信息
         DPOSBlock voteBlock = Vote(dposConfig.round);
-        System.out.println(voteBlock);
+        //System.out.println(+voteBlock);
         //加入此轮的投票池
         VoteManager(voteBlock.blockNode);
 
         for (int i = 0; i< clients.size(); i++){
-            System.out.println("send Vote");
+            System.out.println("send Vote:" + voteBlock.blockNode.AddressName);
             sendToServers(voteBlock);
         }
     }
@@ -123,35 +134,51 @@ public class DPOS extends Algorithm {
             if (VotePool.size() == clients.size() + 1){
                 Map<Node,Integer> voteCount = new TreeMap<Node, Integer>();
                 for (Node node:VotePool) {
-                    if (!voteCount.keySet().contains(node))
+                    if (!voteCount.containsKey(node))
                         voteCount.put(node,node.voteNumber);
                     else
                         voteCount.replace(node, voteCount.get(node) + node.voteNumber) ;
                 }
 
+                {
+                    //增加空票来解决获得投票人过少的情况
+                    for (int i = 0;i < clients.size();i++){
+                        if (clients.get(i).getInetAddress().toString().charAt(0) == '/'){
+                            String addr = clients.get(i).getInetAddress().toString().substring(1);
+                            voteCount.put(new Node(addr,1,dposConfig.round),0);
+                        }else{
+                            voteCount.put(new Node(clients.get(i).getInetAddress().toString(),1,dposConfig.round),0);
+                        }
+                    }
+                    voteCount.put(new Node(InetAddr,1,dposConfig.round),0);
+                }
+
+
                 //排序
                 List<Map.Entry<Node,Integer>> list = new ArrayList<Map.Entry<Node,Integer>>(voteCount.entrySet());
-                Collections.sort(list,new Comparator<Map.Entry<Node,Integer>>() {
+                list.sort(new Comparator<Map.Entry<Node, Integer>>() {
                     @Override
                     public int compare(Map.Entry<Node, Integer> o1, Map.Entry<Node, Integer> o2) {
-                        if (o1.getValue() < o2.getValue()){
+                        if (o1.getValue() < o2.getValue()) {
                             return 1;
-                        }else if(o1.getValue() == o2.getValue()){
+                        } else if (o1.getValue().equals(o2.getValue())) {
                             return o1.getKey().AddressName.compareTo(o2.getKey().AddressName);
-                        }else{
+                        } else {
                             return -1;
                         }
                     }
                 });
 
+
                 VotePool.clear();
                 //检查是否有自己
-                int LoopNumber = dposConfig.delegateNumber < list.size() ? dposConfig.delegateNumber : list.size();
+                int LoopNumber = Math.min(dposConfig.delegateNumber, list.size());
                 for (int i = 0;i < LoopNumber;i++){
                     VotePool.add(list.get(i).getKey());
-                    if (list.get(i).getKey().AddressName == InetAddr){
+                    if (list.get(i).getKey().AddressName.equals(InetAddr)){
                         if (i == 0){
                             //由我先产生一个区块
+                            System.out.println("I send A block" + list.get(i).getKey());
                             SendGenerateBlock(list.get(i).getKey());
                             Pointer++;
                         }else{
@@ -166,6 +193,7 @@ public class DPOS extends Algorithm {
 
     public void VerifyBlock(DPOSBlock block){
         if (block.Index == -1){
+            System.out.println("Receive Vote Message" + block.blockNode);
             VoteManager(block.blockNode);
         }else{
             chain.add(block);

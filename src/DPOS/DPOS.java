@@ -109,25 +109,17 @@ public class DPOS extends Algorithm {
         //System.out.println(+voteBlock);
         //加入此轮的投票池
         VoteManager(voteBlock.blockNode);
-
-        for (int i = 0; i< clients.size(); i++){
-            System.out.println("send Vote:" + voteBlock.blockNode.AddressName);
-            sendToServers(voteBlock);
-        }
+        sendToServers(voteBlock);
     }
 
     //send block
     public void SendGenerateBlock(Node node){
-
-        for (int i = 0; i< clients.size(); i++){
-            System.out.println("send");
-            sendToServers(GenerateBlock(node));
-        }
-
+        sendToServers(GenerateBlock(node));
     }
 
     //投票池进行排序和产生
     public void VoteManager(Node newNode){
+        System.out.println("in VoteManager");
         if (dposConfig.round == newNode.round){
             VotePool.add(newNode);
             //如果收到了全部投票

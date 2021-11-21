@@ -29,6 +29,8 @@ public class DPOS extends Algorithm {
     private int MyIndexThisRound = -1;
     public int Pointer = 0;
 
+    private boolean finished = false;
+
     public DPOS(int PeerID, List<Socket> socketList,String Address) {
         super(PeerID, socketList);
         this.InetAddr = Address;
@@ -60,23 +62,25 @@ public class DPOS extends Algorithm {
         SendVoteBlock();
 
         while (true){
-            if(VotePool.size()==clients.size()+1){
+
+            if(VotePool.size()==clients.size()+1 && !finished){
                 //执行投票统计逻辑
                 VoteManager();
             }
             Verify();
+
+            //System.out.println("Whiling");
         }
     }
 
     @Override
     protected boolean sendToServers(OriginBlock block) {
-
-        for(Socket socket:clients){
+        int i = 0;
+        System.out.println("in sendToServers");
+        for(ObjectOutputStream oos:oosList){
+            System.out.println("Send to Server:"+clients.get(i++));
             try {
-                System.out.println("Send to server:"+socket.getInetAddress());
-                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                //outputStream.writeObject("Block from Peer:"+PeerID+"\n"+block.toString());
-                outputStream.writeObject(block);
+                oos.writeObject(block);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;
@@ -117,7 +121,7 @@ public class DPOS extends Algorithm {
     public void SendVoteBlock(){
         //产生此轮的投票信息
         DPOSBlock voteBlock = Vote(dposConfig.round);
-        //System.out.println(+voteBlock);
+        System.out.println("Send AddressName:"+voteBlock.blockNode.AddressName);
         //加入此轮的投票池
         VotePool.add(voteBlock.blockNode);
         sendToServers(voteBlock);
@@ -184,20 +188,20 @@ public class DPOS extends Algorithm {
                 }
             }
         }
-
-
-
+        finished = true;
     }
 
     private void Verify(){
         if (MyIndexThisRound == Pointer){
             SendGenerateBlock(VotePool.get(Pointer));
+            Pointer++;
         }
         if (Pointer == dposConfig.delegateNumber){
             dposConfig.round++;
             MyIndexThisRound = -1;
             Pointer = 0;
             VotePool.clear();
+            finished = false;
             SendVoteBlock();
         }
     }

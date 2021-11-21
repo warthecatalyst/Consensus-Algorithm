@@ -12,6 +12,7 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.net.StandardSocketOptions;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
@@ -55,12 +56,12 @@ public class POW extends Algorithm {
 
     @Override
     protected boolean sendToServers(OriginBlock block) {
-        for(Socket socket:clients){
+        int i = 0;
+        System.out.println("in sendToServers");
+        for(ObjectOutputStream oos:oosList){
+            System.out.println("Send to Server:"+clients.get(i++));
             try {
-                System.out.println("Send to server:"+socket.getInetAddress());
-                ObjectOutputStream outputStream = new ObjectOutputStream(socket.getOutputStream());
-                //outputStream.writeObject("Block from Peer:"+PeerID+"\n"+block.toString());
-                outputStream.writeObject(block);
+                oos.writeObject(block);
             } catch (IOException e) {
                 e.printStackTrace();
                 return false;

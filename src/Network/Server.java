@@ -35,10 +35,10 @@ public class Server extends Thread{
         try {
             ServerSocket serverSocket = new ServerSocket(Portnum,3,InetAddress.getByName(Addr));
             Socket socket = serverSocket.accept();
-            //isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+            isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 
             while(true){
-                isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
+                //isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
                 Object obj = isFromClient.readObject();
                 System.out.println("read from other peer");
                 synchronized (poxThread){

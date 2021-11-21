@@ -1,5 +1,6 @@
 package Run;
 
+import DPOS.DPOS;
 import Network.Server;
 import OriginBlock.Algorithm;
 import POS.POS;
@@ -32,9 +33,31 @@ public class Main {
         System.out.println("请输入自己的peerID号:");
         PeerID = scanner.nextInt();
         System.out.println("自己的peerID号为:"+PeerID);
-
-        Algorithm pow = new POW(PeerID,new ArrayList<>());
-        Server server = new Server(InetAddr,Portnum,PeerID,pow);
+        Algorithm Consensus;
+        while (true)
+        {
+            System.out.println("请选择需要运行的协议(1.POW,2.POS,3.DPOS)：");
+            int index=scanner.nextInt();
+            if(index==1)
+            {
+                System.out.println("运行POW协议");
+                Consensus=new POW(PeerID,new ArrayList<>());
+                break;
+            }else if(index==2)
+            {
+                System.out.println("运行POS协议");
+                Consensus=new POS(PeerID,new ArrayList<>(),InetAddr);
+                break;
+            }else if(index==3)
+            {
+                System.out.println("运行POS协议");
+                Consensus=new DPOS(PeerID,new ArrayList<>(),InetAddr);
+                break;
+            }else {
+                System.out.println("输入错误！");
+            }
+        }
+        Server server = new Server(InetAddr,Portnum,PeerID,Consensus);
         server.start();
 
         System.out.println("请输入其他peer的peerID(0退出):");
@@ -50,11 +73,11 @@ public class Main {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            pow.clients.add(socket);
+            Consensus.clients.add(socket);
             System.out.println("请输入其他peer的peerID(0退出):");
             otherPeerID = scanner.nextInt();
         }
-        pow.start();
+        Consensus.start();
     }
 }
 

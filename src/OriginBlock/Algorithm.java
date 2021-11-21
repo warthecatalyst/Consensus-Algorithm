@@ -32,6 +32,7 @@ public abstract class Algorithm extends Thread{
         this.clients = socketList;
         oosList = new ArrayList<>();
     }
+
     @Override
     public abstract void run();
 

@@ -57,6 +57,11 @@ public class DPOS extends Algorithm {
         }
 
         //开始投票
+        try {
+            Thread.sleep(5000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
         SendVoteBlock();
 
         while (true){
@@ -70,7 +75,6 @@ public class DPOS extends Algorithm {
 
     @Override
     protected boolean sendToServers(OriginBlock block) {
-
         for(Socket socket:clients){
             try {
                 System.out.println("Send to server:"+socket.getInetAddress());
@@ -192,6 +196,7 @@ public class DPOS extends Algorithm {
     private void Verify(){
         if (MyIndexThisRound == Pointer){
             SendGenerateBlock(VotePool.get(Pointer));
+            Pointer++;
         }
         if (Pointer == dposConfig.delegateNumber){
             dposConfig.round++;

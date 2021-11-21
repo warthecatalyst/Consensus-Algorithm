@@ -4,6 +4,8 @@ package OriginBlock;
 import POW.POWBlockChain;
 import Network.Client;
 import Network.Server;
+
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,7 @@ public abstract class Algorithm extends Thread{
     protected int PeerID;
     public OriginBlockChain chain;
     public List<Socket> clients;
+    public List<ObjectOutputStream> oosList;
     protected boolean isWaiting = false;   //判断当前线程是否处于等待状态
     /**
      * Algorithm类的构造函数
@@ -27,6 +30,7 @@ public abstract class Algorithm extends Thread{
     public Algorithm(int PeerID,List<Socket> socketList){
         this.PeerID = PeerID;
         this.clients = socketList;
+        oosList = new ArrayList<>();
     }
     @Override
     public abstract void run();

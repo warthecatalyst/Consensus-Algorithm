@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -37,8 +38,9 @@ public class NetworkTest {
         PeerID = scanner.nextInt();
         System.out.println("自己的peerID号为:"+PeerID);
 
-        Algorithm pow = new POW(PeerID,new ArrayList<>());
-        //Algorithm pow = new DPOS(PeerID,new ArrayList<>(),InetAddr);
+        //Algorithm pow = new POW(PeerID,new ArrayList<>());
+        //Algorithm pow = new POS(PeerID,new ArrayList<>(),InetAddr);
+        Algorithm pow = new DPOS(PeerID,new ArrayList<>(),InetAddr);
         Server server = new Server(InetAddr,Portnum,PeerID,pow);
         server.start();
 

@@ -22,7 +22,7 @@ import java.util.Scanner;
  * 运行POW算法的线程类，继承Thread覆盖run方法
  */
 public class POW extends Algorithm {
-    public static final int DIF = 4;    //在这个简单的POW系统中，不需要进行难度值的变化
+    public static final int DIF = 5;    //在这个简单的POW系统中，不需要进行难度值的变化
     public POW(int PeerID, List<Socket> socketList){
         super(PeerID,socketList);
     }

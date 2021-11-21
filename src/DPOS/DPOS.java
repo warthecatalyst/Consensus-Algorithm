@@ -26,7 +26,7 @@ public class DPOS extends Algorithm {
     String InetAddr = "";
     //统计计票
     public List<Node> VotePool = new ArrayList<Node>();
-    private int MyIndexThisRound = -1;
+    public int MyIndexThisRound = -1;
     public int Pointer = 0;
 
     private boolean finished = false;
@@ -59,22 +59,14 @@ public class DPOS extends Algorithm {
         }
 
         //开始投票
-        try {
-            Thread.sleep(5000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
         SendVoteBlock();
 
         while (true){
-
-            if(VotePool.size()==clients.size()+1 && !finished){
-                //执行投票统计逻辑
-                VoteManager();
-            }
-            Verify();
-
-            //System.out.println("Whiling");
+//            if(VotePool.size()==clients.size()+1 && !finished){
+//                //执行投票统计逻辑
+//                VoteManager();
+//            }
+            //Verify();
         }
     }
 
@@ -117,6 +109,7 @@ public class DPOS extends Algorithm {
         Random rand = new Random(new Date().getTime());
         int randNumber = rand.nextInt(clients.size() + 1);
         Node vote = new Node(ipAddress.get(randNumber),1,round);
+        //Node vote = new Node("192.168.5.16",1,round);
         //index为-1的区块为投票信息
         return new DPOSBlock(-1,new Date(),"","","",vote);
     }
@@ -128,16 +121,23 @@ public class DPOS extends Algorithm {
         System.out.println("Send AddressName:"+voteBlock.blockNode.AddressName);
         //加入此轮的投票池
         VotePool.add(voteBlock.blockNode);
+        voteBlock.Myip = "192.168.5.18";
         sendToServers(voteBlock);
+        VoteManager();
     }
 
     //send block
     public void SendGenerateBlock(Node node){
-        sendToServers(GenerateBlock(node));
+        DPOSBlock block = GenerateBlock(node);
+        block.Myip = "192.168.5.18";
+        sendToServers(block);
     }
 
     //投票池进行排序和产生
     public void VoteManager(){
+        if (!(VotePool.size()==clients.size()+1 && !finished)){
+            return;
+        }
         Map<Node,Integer> voteCount = new TreeMap<Node, Integer>();
         for (Node node:VotePool) {
             if (!voteCount.containsKey(node))
@@ -149,14 +149,12 @@ public class DPOS extends Algorithm {
         {
             //增加空票来解决获得投票人过少的情况
             for (int i = 0;i < clients.size();i++){
-                if (clients.get(i).getInetAddress().toString().charAt(0) == '/'){
-                    String addr = clients.get(i).getInetAddress().toString().substring(1);
+                String addr = clients.get(i).getInetAddress().toString().substring(1);
+                if (!voteCount.containsKey(new Node(addr,1,dposConfig.round)))
                     voteCount.put(new Node(addr,1,dposConfig.round),0);
-                }else{
-                    voteCount.put(new Node(clients.get(i).getInetAddress().toString(),1,dposConfig.round),0);
-                }
             }
-            voteCount.put(new Node(InetAddr,1,dposConfig.round),0);
+            if (!voteCount.containsKey(new Node(InetAddr,1,dposConfig.round)))
+                voteCount.put(new Node(InetAddr,1,dposConfig.round),0);
         }
 
 
@@ -192,19 +190,24 @@ public class DPOS extends Algorithm {
                 }
             }
         }
+
         finished = true;
     }
 
-    private void Verify(){
+
+    public void Verify(){
+        //System.out.println("Pointer:" + Pointer);
         if (MyIndexThisRound == Pointer){
             SendGenerateBlock(VotePool.get(Pointer));
             Pointer++;
         }
         if (Pointer == dposConfig.delegateNumber){
             dposConfig.round++;
+            System.out.println("Round:" + dposConfig.round);
             MyIndexThisRound = -1;
             Pointer = 0;
             VotePool.clear();
+
             finished = false;
             SendVoteBlock();
         }

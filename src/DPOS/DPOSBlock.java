@@ -26,13 +26,13 @@ class Node implements Comparable<Node>,java.io.Serializable{
 
     @Override
     public int compareTo(Node o) {
-        return this.voteNumber - o.voteNumber;
+        return this.AddressName.compareTo(o.AddressName);
     }
 }
 
 public class DPOSBlock extends OriginBlock {
     public Node blockNode;
-
+    public String Myip;
     public DPOSBlock(int Index, Date timeStamp, String Data, String Prehash, String Hash, Node blockNode) {
         super(Index, timeStamp, Data, Prehash, Hash);
         this.blockNode = blockNode;
@@ -55,6 +55,7 @@ public class DPOSBlock extends OriginBlock {
                 ", blockNode.voteNumber='" + blockNode.voteNumber + '\'' +
                 ", blockNode.round='" + blockNode.round + '\'' +
                 ", Prehash='" + Prehash + '\'' +
+                ", MyIP = '" + Myip +'\'' +
                 '}';
     }
 }

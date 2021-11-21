@@ -38,7 +38,6 @@ public class Server extends Thread{
             isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
 
             while(true){
-                //isFromClient = new ObjectInputStream(new BufferedInputStream(socket.getInputStream()));
                 Object obj = isFromClient.readObject();
                 System.out.println("read from other peer");
                 synchronized (poxThread){
@@ -59,9 +58,11 @@ public class Server extends Thread{
                     DPOSBlock dposBlock = (DPOSBlock) object;
                     if(DPOS.isVote(dposBlock)){
                         ((DPOS) poxThread).VotePool.add(dposBlock.blockNode);
+                        ((DPOS) poxThread).VoteManager();
                     }else{
                         poxThread.chain.add(dposBlock);
                         ((DPOS) poxThread).Pointer++;
+                        ((DPOS) poxThread).Verify();
                     }
                 }else if(object instanceof POWBlock){
                     poxThread.chain.add((POWBlock) object);
@@ -71,7 +72,7 @@ public class Server extends Thread{
                     //Thread.sleep(5);
                     //((POS)poxThread).SuspendFlag = false;
                 }
-                System.out.println("Block added to chain:\n"+poxThread.chain.back());
+                System.out.println("Block added to chain:\n"+object.toString());
             }
         }else{
             System.err.println("Something goes wrong in OnReceive()----Wrong Type!");
@@ -94,5 +95,57 @@ public class Server extends Thread{
 
         //Server server = new Server(Addr,Portnum,1);
         //server.start();
+    }
+}
+
+class ThreadHandler extends Thread{
+    private final Socket connectToClient;
+    private final ObjectInputStream isFromClient;
+    private final Algorithm poxThread;
+    public ThreadHandler(Socket socket,ObjectInputStream isFromClient,Algorithm poxThread){
+        connectToClient = socket;
+        this.isFromClient = isFromClient;
+        this.poxThread = poxThread;
+    }
+
+    @Override
+    public void run() {
+        try {
+            Object obj = isFromClient.readObject();
+            System.out.println("read from other peer:");
+            synchronized (poxThread){
+                poxThread.yield();
+                OnReceive(obj);
+                poxThread.notify();
+            }
+        } catch (IOException | ClassNotFoundException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void OnReceive(Object object) throws InterruptedException {
+        if(object instanceof OriginBlock){
+            if(((OriginBlock) object).Verify()){
+                if (object instanceof DPOSBlock){
+                    DPOSBlock dposBlock = (DPOSBlock) object;
+                    if(DPOS.isVote(dposBlock)){
+                        ((DPOS) poxThread).VotePool.add(dposBlock.blockNode);
+                    }else{
+                        poxThread.chain.add(dposBlock);
+                        ((DPOS) poxThread).Pointer++;
+                        ((DPOS) poxThread).Verify();
+                    }
+                }else if(object instanceof POWBlock){
+                    poxThread.chain.add((POWBlock) object);
+                    System.out.println("Block added to chain:\n"+poxThread.chain.back());
+                }else if(object instanceof POSBlock){
+                    ((POS)poxThread).JumpToNextRound = true;
+                    poxThread.chain.add((POSBlock) object);
+                }
+
+            }
+        }else{
+            System.err.println("Something goes wrong in OnReceive()----Wrong Type!");
+        }
     }
 }

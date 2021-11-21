@@ -7,6 +7,7 @@ import POS.POS;
 import POW.POW;
 
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,6 +75,12 @@ public class Main {
                 e.printStackTrace();
             }
             Consensus.clients.add(socket);
+            try {
+                assert socket != null;
+                Consensus.oosList.add(new ObjectOutputStream(socket.getOutputStream()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             System.out.println("请输入其他peer的peerID(0退出):");
             otherPeerID = scanner.nextInt();
         }

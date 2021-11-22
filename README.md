@@ -1,5 +1,5 @@
-# blockchain
-Blockchain lab for course
+# Consensus Algorithm
+Consensus Algorithm lab for course blockchain
 
 华中科技大学研究生一年级区块链课程小组合作任务
 组员：周鑫宜，华嘉欣，舒欢，许成
@@ -31,3 +31,8 @@ Blockchain lab for course
 情况2：别的Peer先挖到矿，那么当前停止挖矿，直到Server验证结束之后才开始挖矿
 
 基于以上分析，我认为Algorithm线程中应该不需要Server线程的对象，但是Server线程中需要Algorithm线程的对象
+
+2021/11/22日更新
+2021/11/21日区块链代码部分已经全部做完，且已经经过4个人共同测试
+后来改动的部分主要有:p2p网络中ObjectInputStream和ObjectOutputStream不能够进行多封装，也就是在创建Algorithm类的过程中就需要初始化ObjectOutputStream，否则会产生多封装问题，导致invalid type code:AC异常的抛出
+以及华嘉欣同学对DPOS协议的进一步更改，使得之前不能够顺利运行的bug得到解决。
